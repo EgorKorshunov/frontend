@@ -7,7 +7,7 @@ import BaseContainerWithNavbar from 'components/BaseContainerWithNavbar';
 import PlaceBet from 'components/PlaceBet';
 import BackLink from 'components/BackLink';
 import LastCrashes from 'components/LastCrashes';
-import GameAnimation from 'components/RosiGameAnimation';
+import GameAnimation from 'components/PumpDumpAnimation';
 import GameBets from 'components/GameBets';
 import Chat from 'components/Chat';
 import { ROSI_GAME_EVENT_ID } from 'constants/RosiGame';

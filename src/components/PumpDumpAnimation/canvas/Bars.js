@@ -11,10 +11,13 @@ const AXIS_LABEL_NUM = 50;
 const AXIS_LABEL_FONT_FAMILY = 'PlusJakarta-Bold';
 const AXIS_LABEL_COLOR = 0xffffff;
 const AXIS_LABEL_FONT_SIZE = 10;
-export class CoinAnimation {
+
+export class Bars {
   constructor(app) {
     this.app = app;
     this.container = new PIXI.Container();
+
+    console.log('BARS ARE HEREEEEEEEEE');
 
     /* axis labels */
     this.axisLabels = [];
@@ -31,8 +34,10 @@ export class CoinAnimation {
       this.container.addChild(label);
     }
 
-    console.log('NEWJDKSJFKS');
-    this.printOne();
+    // CONTAINER WITH BARS
+    this.bars = [];
+    this.reactions = [];
+    this.basicBarWidth = 30;
 
     this.trajectory = new PIXI.Graphics();
     this.container.addChild(this.trajectory);
@@ -71,129 +76,6 @@ export class CoinAnimation {
     );
 
     this.gameStartTime = Date.now();
-
-    /* Particle (flame) */
-    this.flameEmitter = new particles.Emitter(this.container, {
-      lifetime: {
-        min: 0.3,
-        max: 0.75,
-      },
-      frequency: 0.0004,
-      spawnChance: 0.05,
-      emitterLifetime: 0,
-      maxParticles: 1000,
-      addAtBack: false,
-      pos: {
-        x: 0,
-        y: 0,
-      },
-      behaviors: [
-        {
-          type: 'alpha',
-          config: {
-            alpha: {
-              list: [
-                {
-                  time: 0,
-                  value: 1,
-                },
-                {
-                  time: 1,
-                  value: 0,
-                },
-              ],
-            },
-          },
-        },
-        {
-          type: 'moveSpeedStatic',
-          config: {
-            min: 300,
-            max: 500,
-          },
-        },
-        {
-          type: 'scale',
-          config: {
-            scale: {
-              list: [
-                {
-                  time: 0,
-                  value: 0.25,
-                },
-                {
-                  time: 1,
-                  value: 0.55,
-                },
-              ],
-            },
-            minMult: 1,
-          },
-        },
-        {
-          type: 'color',
-          config: {
-            color: {
-              list: [
-                {
-                  time: 0,
-                  value: 'ffff91',
-                },
-                {
-                  time: 1,
-                  value: 'ffffff',
-                },
-              ],
-            },
-          },
-        },
-        {
-          type: 'rotation',
-          config: {
-            accel: 0,
-            minSpeed: 50,
-            maxSpeed: 50,
-            minStart: 265,
-            maxStart: 275,
-          },
-        },
-        {
-          type: 'textureRandom',
-          config: {
-            textures: [
-              this.app.loader.resources.star1.texture,
-              this.app.loader.resources.star2.texture,
-              this.app.loader.resources.particle.texture,
-            ],
-          },
-        },
-        {
-          type: 'spawnShape',
-          config: {
-            type: 'torus',
-            data: {
-              x: 0,
-              y: 0,
-              radius: 30, // TODO: depends on the coin size
-              innerRadius: 0,
-              affectRotation: false,
-            },
-          },
-        },
-      ],
-    });
-
-    this.flameElapsed = Date.now();
-    this.flameEmitter.rotate(Math.PI * 1.5);
-
-    const flameUpdate = () => {
-      requestAnimationFrame(flameUpdate);
-      var now = Date.now();
-      this.flameEmitter.update((now - this.flameElapsed) * 0.001);
-      this.flameElapsed = now;
-    };
-    this.flameEmitter.emit = true;
-    flameUpdate();
 
     /* TODO: move to  utils */
     this.getGlobalPositionByTime = time => {
@@ -243,7 +125,101 @@ export class CoinAnimation {
     };
 
     this.printOne = () => {
-      console.log('OOOOOOOOOOOOOONE');
+      console.log('OOOOOOOOOOOONE');
+    };
+
+    //this function is responsible for creating a stngle bar for the graph
+    this.createGradRectangle = (
+      color1,
+      color2,
+      lineColor,
+      x,
+      y,
+      width,
+      height,
+      app
+    ) => {
+      const canvas = document.createElement('canvas');
+
+      let width = 20 * scaleX;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+
+      // use canvas2d API to create gradient
+      const grd = ctx.createLinearGradient(0, 0, 0, height);
+      grd.addColorStop(0, color1);
+      grd.addColorStop(1, color2);
+
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, width, height);
+
+      const container = new PIXI.Container();
+      app.stage.addChild(container);
+      container.x = x;
+      container.y = y;
+      container.pivot.y = height;
+
+      const barLine = new PIXI.Graphics();
+
+      barLine.lineStyle(2, lineColor, 1);
+      barLine.moveTo(0, -height * 0.65);
+      barLine.lineTo(0, height * 0.65);
+
+      barLine.x = width / 2;
+      barLine.y = height / 2;
+
+      const graphics = new PIXI.Graphics()
+        .beginTextureFill({ texture: PIXI.Texture.from(canvas) })
+        .drawRoundedRect(0, 0, width, height, 3)
+        .endFill();
+
+      container.addChild(barLine);
+
+      container.scale.set(0.01, 0.01);
+
+      container.addChild(graphics);
+
+      var counter = 1;
+      var i = setInterval(function () {
+        container.scale.set(0.01 * counter, 0.01 * counter);
+        counter++;
+        if (counter === 101) {
+          clearInterval(i);
+        }
+      }, 5);
+
+      this.bars.push(graphics);
+
+      return graphics;
+    };
+
+    // function to spawn a new sticker and scale it
+    this.createSticker = (logo, x, y) => {
+      logo.anchor.set(0.5);
+
+      // Move the sprite to the center of the screen
+      logo.x = x;
+      logo.y = y;
+
+      logo.scale.set(0.01);
+
+      app.app.stage.addChild(logo);
+
+      var i = setInterval(function () {
+        // do your thing
+        logo.scale.set(0.01 * counter, 0.01 * counter);
+        counter++;
+        if (counter === 40) {
+          clearInterval(i);
+        }
+      }, 10);
+
+      this.stickers.push(logo);
+
+      return logo;
     };
   }
 

@@ -31,8 +31,10 @@ export class CoinAnimation {
       this.container.addChild(label);
     }
 
-    console.log('NEWJDKSJFKS');
-    this.printOne();
+    // CONTAINER WITH BARS
+    this.bars = [];
+    // this.printOne();
+    console.log(1 + 1 + 1 + 1 + 1);
 
     this.trajectory = new PIXI.Graphics();
     this.container.addChild(this.trajectory);
@@ -215,6 +217,7 @@ export class CoinAnimation {
       if (y * scaleY >= dY) {
         scaleY = dY / y;
       }
+      console.log(scaleY);
       return scaleY;
     };
 
@@ -242,9 +245,7 @@ export class CoinAnimation {
       };
     };
 
-    this.printOne = () => {
-      console.log('OOOOOOOOOOOOOONE');
-    };
+    this.printOne = () => console.log('FBHJ|GDFHGDH');
   }
 
   getCurrentElonFrame() {
