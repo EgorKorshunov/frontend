@@ -143,6 +143,10 @@ export class Bars {
 
       let width = 20 * scaleX;
 
+      // need to find from where I get the scale
+      // width = width * scaleX
+      // height = height * scaleX;
+
       canvas.width = width;
       canvas.height = height;
 
